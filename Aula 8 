@@ -1,0 +1,142 @@
+{
+  "nbformat": 4,
+  "nbformat_minor": 0,
+  "metadata": {
+    "colab": {
+      "provenance": [],
+      "authorship_tag": "ABX9TyMJPtamBw2bPwoLQFxnIZ3w",
+      "include_colab_link": true
+    },
+    "kernelspec": {
+      "name": "python3",
+      "display_name": "Python 3"
+    },
+    "language_info": {
+      "name": "python"
+    }
+  },
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "view-in-github",
+        "colab_type": "text"
+      },
+      "source": [
+        "<a href=\"https://colab.research.google.com/github/Isabellycristina7/Engenharia_de_Prompt_AI/blob/main/Aula%208%20\" target=\"_parent\"><img src=\"https://colab.research.google.com/assets/colab-badge.svg\" alt=\"Open In Colab\"/></a>"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "#Cria um programa autônomo que dispare alertas (mensagens de alertas no console ou e-mail simulado) unicamente quando uma condição crítica for atingida."
+      ],
+      "metadata": {
+        "id": "EuFRqgmpceyJ"
+      }
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "id": "O_JOgExxYTIm"
+      },
+      "outputs": [],
+      "source": [
+        "import time # Importa o módulo time para funções relacionadas a tempo, como sleep e formatação de data/hora\n",
+        "import random # Importa o módulo random para gerar números aleatórios, usado na simulação de temperatura\n",
+        "\n",
+        "# --- Configurações ---\n",
+        "# Define o limite de temperatura em °C. Acima deste valor, um alerta será disparado.\n",
+        "CRITICAL_TEMPERATURE_THRESHOLD = 30\n",
+        "# Define o intervalo de tempo em segundos entre cada verificação de temperatura.\n",
+        "CHECK_INTERVAL_SECONDS = 5\n",
+        "\n",
+        "# --- Função para simular a leitura da temperatura ---\n",
+        "def read_temperature():\n",
+        "    \"\"\"\n",
+        "    Simula a leitura de uma temperatura de um sensor.\n",
+        "    Em um cenário real, esta função seria substituída pela leitura de um hardware real.\n",
+        "    \"\"\"\n",
+        "    # Gera uma temperatura aleatória entre 20 e 35 graus Celsius, arredondada para duas casas decimais.\n",
+        "    return round(random.uniform(20, 35), 2)\n",
+        "\n",
+        "# --- Função para enviar alertas ---\n",
+        "def send_alert(message, alert_type=\"console\"):\n",
+        "    \"\"\"\n",
+        "    Envia uma mensagem de alerta. Pode ser exibida no console ou simular o envio de um e-mail.\n",
+        "\n",
+        "    Args:\n",
+        "        message (str): A mensagem de alerta a ser enviada.\n",
+        "        alert_type (str): O tipo de alerta ('console' para imprimir ou 'email_simulado' para simular e-mail).\n",
+        "    \"\"\"\n",
+        "    # Obtém o timestamp atual formatado para inclusão na mensagem de alerta.\n",
+        "    timestamp = time.strftime(\"%Y-%m-%d %H:%M:%S\")\n",
+        "    if alert_type == \"console\":\n",
+        "        print(f\"[{timestamp}] ALERTA CRÍTICO: {message}\")\n",
+        "    elif alert_type == \"email_simulado\":\n",
+        "        print(f\"[{timestamp}] E-MAIL SIMULADO ENVIADO: Assunto: ALERTA CRÍTICO! Mensagem: {message}\")\n",
+        "        # OBS: Em um sistema real, aqui você integraria uma biblioteca ou serviço para envio de e-mails de verdade.\n",
+        "        # Exemplos: 'smtplib' para e-mails via SMTP, ou APIs de serviços como SendGrid, Mailgun, etc.\n",
+        "    else:\n",
+        "        # Caso um tipo de alerta desconhecido seja fornecido.\n",
+        "        print(f\"[{timestamp}] Tipo de alerta desconhecido: {alert_type} - {message}\")\n",
+        "\n",
+        "# --- Loop principal de monitoramento autônomo ---\n",
+        "def autonomous_monitor():\n",
+        "    print(\"\\n--- Iniciando monitoramento autônomo de temperatura ---\")\n",
+        "    print(f\"Alerta disparado se a temperatura exceder {CRITICAL_TEMPERATURE_THRESHOLD}°C.\")\n",
+        "    print(f\"Verificação a cada {CHECK_INTERVAL_SECONDS} segundos. Pressione Ctrl+C para parar.\")\n",
+        "\n",
+        "    # Variável de estado para controlar se um alerta já foi disparado. Isso evita alertas repetidos para a mesma condição.\n",
+        "    last_alert_state = False\n",
+        "\n",
+        "    try:\n",
+        "        # Loop infinito para monitoramento contínuo\n",
+        "        while True:\n",
+        "            current_temperature = read_temperature() # Lê a temperatura atual (simulada)\n",
+        "\n",
+        "            # Verifica se a temperatura atual excedeu o limite crítico\n",
+        "            if current_temperature > CRITICAL_TEMPERATURE_THRESHOLD:\n",
+        "                # Se a temperatura está crítica e ainda não disparamos um alerta para essa condição\n",
+        "                if not last_alert_state:\n",
+        "                    alert_message = (f\"Temperatura atual de {current_temperature}°C \"\n",
+        "                                     f\"excede o limite crítico de {CRITICAL_TEMPERATURE_THRESHOLD}°C!\")\n",
+        "                    send_alert(alert_message, alert_type=\"console\") # Envia o alerta para o console\n",
+        "                    # send_alert(alert_message, alert_type=\"email_simulado\") # Descomente esta linha para testar o envio de e-mail simulado\n",
+        "                    last_alert_state = True # Atualiza o estado para indicar que um alerta foi disparado\n",
+        "                else:\n",
+        "                    # Opcional: Se a condição crítica persiste, loga um aviso sem disparar um novo alerta \"crítico\"\n",
+        "                    print(f\"[{time.strftime(\"%Y-%m-%M %H:%M:%S\")}] \"\n",
+        "                          f\"AVISO: Condição crítica persistente. Temp: {current_temperature}°C\")\n",
+        "            else:\n",
+        "                # Se a temperatura não está crítica\n",
+        "                # E se antes estava crítica (last_alert_state é True), indica que a condição foi resolvida\n",
+        "                if last_alert_state:\n",
+        "                    print(f\"[{time.strftime(\"%Y-%m-%M %H:%M:%S\")}] \"\n",
+        "                          f\"INFO: Temperatura voltou ao normal: {current_temperature}°C.\")\n",
+        "                    last_alert_state = False # Reseta o estado do alerta\n",
+        "                else:\n",
+        "                    # Se a temperatura está normal e já estava normal\n",
+        "                    print(f\"[{time.strftime(\"%Y-%m-%M %H:%M:%S\")}] \"\n",
+        "                          f\"INFO: Temperatura atual: {current_temperature}°C. Tudo normal.\")\n",
+        "\n",
+        "            # Pausa o monitoramento pelo tempo definido em CHECK_INTERVAL_SECONDS\n",
+        "            time.sleep(CHECK_INTERVAL_SECONDS)\n",
+        "\n",
+        "    except KeyboardInterrupt:\n",
+        "        # Captura a interrupção pelo teclado (Ctrl+C) para encerrar o monitoramento de forma graciosa.\n",
+        "        print(\"\\n--- Monitoramento interrompido pelo usuário. ---\")\n",
+        "    except Exception as e:\n",
+        "        # Captura qualquer outra exceção inesperada que possa ocorrer durante o monitoramento.\n",
+        "        print(f\"\\n--- ERRO INESPERADO: {e} ---\\nMonitoramento encerrado.\")\n",
+        "\n",
+        "# --- Iniciar o monitoramento ---\n",
+        "# O bloco abaixo garante que a função autonomous_monitor() seja chamada apenas quando o script for executado diretamente.\n",
+        "if __name__ == \"__main__\":\n",
+        "    autonomous_monitor()\n",
+        ""
+      ]
+    }
+  ]
+}
